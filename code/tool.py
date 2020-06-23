@@ -237,6 +237,84 @@ def pearson_sim(v1, v2):
     pearson = cov/(std_v1*std_v2)
     return pearson
 
+def pick4(target_file_dir):
+    """"
+    読み込むcsvファイルのパスを引数とする
+    ピークの開始時間、終了時間、面積、トップピーク、トップピークの高さをlistで返す
+    強度が最大ピークの100分の一以下のピークを除去する
+    """
+    import pandas as pd
+    
+    target_file= pd.read_csv(target_file_dir, header = 0, index_col = 0)
+    rt = [float(i) for i in list(target_file.columns)]
+    cur = [float(i)for i in list(target_file.loc["total_intensity"])]
+    #最大強度の100分の1以下のピークを排除
+    rejection = max(cur)/100
+    temp = []
+    for i in cur:
+        if i >= rejection:
+            temp.append(i)
+        else:
+            temp.append(0)
+    cur = temp
+    #currentの差を利用.curを一つ左にずらしたもの
+    cur2 = cur[1::] + [0,]     
+    dif = []
+    for p in range(len(cur)):
+        dif.append(cur2[p]-cur[p])
+    #ピークの数え上げ
+    peak_number = 0     #ピークの数
+    start = [rt[0],]    #ピークの開始時刻のリスト
+    end = []            #ピークの終了時刻のリスト
+    area = 0            #ピークの面積
+    peak_area = []      #ピーク面積のリスト
+    top_peak = []       #ピークの最高点のrt
+    peak_height = []
+    #ピークの判別は傾きがマイナスからプラスに転じたかで判定
+    for p in range(0,len(dif)):
+        if p == 0:
+            area += cur[p]
+            if dif[p] <= 0:
+                top_peak.append(rt[p])
+                peak_height.append(cur[p])
+        elif dif[p] <= 0:
+            area += cur[p]
+            if dif[p-1] > 0:
+                top_peak.append(rt[p])
+                peak_height.append(cur[p])
+        else:
+            if dif[p-1] <= 0:
+                area += cur[p]
+                peak_number += 1
+                end.append(rt[p])
+                start.append(rt[p])
+                peak_area.append(area)
+                area =0
+            else:
+                area += cur[p]
+    peak =list(zip(start,end,peak_area,top_peak,peak_height))
+    return peak
+
+def get_tic_cutoff (target_file_dir):
+    """"
+    読み込むcsvファイルのパスを引数とする
+    保持時間と強度をlistで返す
+    """
+    import pandas as pd
+
+    #targe_fileの読み込み
+    target_file= pd.read_csv(target_file_dir, header = 0, index_col = 0, low_memory=False)   
+    rt = [float(i) for i in list(target_file.columns)]
+    cur = [float(i)for i in list(target_file.loc["total_intensity"])]
+    rejection = max(cur)/100
+    temp = []
+    for i in cur:
+        if i >= rejection:
+            temp.append(i)
+        else:
+            temp.append(0)
+    cur = temp
+    return [rt, cur]
 
 """
 Created on Wed Mar 25 16:33:29 2020

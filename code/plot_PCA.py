@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import sklearn
 from sklearn.decomposition import PCA
 
-source_dir = os.path.abspath(r"C:/Users/Chem3-MT/Documents/04.プログラミング/Python/油類鑑定/AIA/kasamatsu")
-output_dir = os.path.abspath(r"C:/Users/Chem3-MT/Documents/04.プログラミング/Python/油類鑑定/AIA/kasamatsu")
+source_dir = os.path.abspath(r"D:/テレワーク/データ/kasamatsu_output")
+output_dir = os.path.abspath(r"D:/テレワーク/データ/kasamatsu_output")
 
-target = "deg_all.csv"
+target = "deg_all_flat.csv"
 figname = target.split(".")[0] + r".png"
 csv_dir = os.path.join(source_dir, target)
 #ファイルの読み込み

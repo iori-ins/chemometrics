@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-PCA用データ前処理プログラム
-保持時間と強度だけにする
-分析対象のファイルを全部書き込む
+標準化に微分を使ったバージョン
 """
+
 
 import os
 os.chdir(os.path.abspath(r"D:/GitHub/chemometrics/code"))
-import csv
 import numpy as np
 import pandas as pd
 
@@ -16,8 +14,8 @@ output_dir = os.path.abspath(r"D:/テレワーク/データ/kasamatsu_output")
 
 #"deg"と"pyro"で指定
 sample_type = "deg"
-sample_type = "pyro"
-output_name = sample_type + r"_all_flat5.csv"
+#sample_type = "pyro"
+output_name = sample_type + r"_all_no_normalized.csv"
 sample_type += r".csv"
 
 filelist = []
@@ -38,21 +36,20 @@ for filename in filelist:
         df_all = pd.DataFrame(np.zeros_like, columns = rt, index = filelist)
         first = False
     intensity = df.iloc[0][1:].tolist()
-    normalized_intensity = []
-    for i in intensity:
-        if i >= max(intensity)/20:
-            normalized_intensity.append(i*1000/max(intensity))
-        else:
-            normalized_intensity.append(0)
+    
+    normalized_intensity = [0]
+    normalized_intensity.extend(np.diff(intensity, n=1).tolist())
     df_all.loc[filename] = normalized_intensity
+    #標準化しないときは下の一文をコメントアウト
+    df_all.loc[filename] = intensity
     df_all = df_all.rename(index = {filename : title})
+    
 
 df_all.to_csv(os.path.join(output_dir, output_name))
 
-
 """
-Created on Mon Jun 15 11:26:53 2020
+Created on Wed Jun 17 09:49:08 2020
 
-@author: Chem3-MT
+@author: hfta_
 """
 
